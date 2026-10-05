@@ -70,10 +70,15 @@ func main() {
 
 	printReply(reply)
 
-	// Offer to run if the model is confident and there are commands.
-	if len(reply.Commands) > 0 && reply.Conf {
+	// Offer to run commands if any were returned.
+	if len(reply.Commands) > 0 {
 		fmt.Println()
-		if askYN(dim("  run ")+"[Y/n]? ", true) {
+		defaultYes := reply.Conf
+		promptMsg := dim("  run ") + "[Y/n]? "
+		if !defaultYes {
+			promptMsg = dim("  run (caution: low confidence) ") + "[y/N]? "
+		}
+		if askYN(promptMsg, defaultYes) {
 			runCommands(cfg, reply.Commands)
 		}
 	}
@@ -202,6 +207,9 @@ func runSetupWith(cfg *Config) {
 	cfg.KeyEnv = spec.KeyEnv
 
 	// Custom model override.
+	if cfg.Provider == "openrouter" {
+		fmt.Println(dim("    hint: openai/gpt-4o-mini, meta-llama/llama-3.3-70b-instruct:free, deepseek/deepseek-chat"))
+	}
 	modelInput, _ := readLine(dim("  model ") + fmt.Sprintf("[default: %s]: ", cfg.Model))
 	if modelInput != "" {
 		cfg.Model = modelInput

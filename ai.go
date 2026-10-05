@@ -56,8 +56,22 @@ func ask(c *Config, question string) (*CommandReply, error) {
 
 	body, _ := io.ReadAll(resp.Body)
 	if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("provider %s returned %d: %s", c.Provider, resp.StatusCode,
-			truncate(string(body), 300))
+		// Try to extract a clean error message from the provider's JSON response.
+		var apiErr struct {
+			Error struct {
+				Message string `json:"message"`
+			} `json:"error"`
+		}
+		hint := ""
+		if resp.StatusCode == 400 || resp.StatusCode == 401 || resp.StatusCode == 404 {
+			hint = "\n  → run " + bold("liner setup") + " to change model or provider"
+		}
+		if json.Unmarshal(body, &apiErr) == nil && apiErr.Error.Message != "" {
+			return nil, fmt.Errorf("provider %s (model %s) returned %d:\n  %s%s",
+				c.Provider, c.Model, resp.StatusCode, apiErr.Error.Message, hint)
+		}
+		return nil, fmt.Errorf("provider %s returned %d: %s%s", c.Provider, resp.StatusCode,
+			truncate(string(body), 300), hint)
 	}
 
 	var parsed struct {

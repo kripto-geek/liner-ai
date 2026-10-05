@@ -49,8 +49,14 @@ func getPass(prompt string) ([]byte, error) {
 		if err != nil {
 			return nil, err
 		}
-		if n == 1 && buf[0] == '\n' {
+		if n == 1 && (buf[0] == '\n' || buf[0] == '\r') {
 			break
+		}
+		if n == 1 && (buf[0] == 127 || buf[0] == 8) { // Backspace
+			if len(line) > 0 {
+				line = line[:len(line)-1]
+			}
+			continue
 		}
 		if n > 0 {
 			line = append(line, buf[:n]...)
