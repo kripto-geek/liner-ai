@@ -28,14 +28,16 @@ $ liner merge this branch into main
 ### From source (requires Go 1.27+)
 
 ```bash
-go install github.com/kripto-geek/liner@latest
+go install github.com/kripto-geek/liner-ai@latest
+# Rename the binary for convenience:
+mv "$(go env GOPATH)/bin/liner-ai" "$(go env GOPATH)/bin/liner"
 ```
 
 ### Manual
 
 ```bash
-git clone https://github.com/kripto-geek/liner.git
-cd liner
+git clone https://github.com/kripto-geek/liner-ai.git
+cd liner-ai
 go build -o liner .
 sudo mv liner /usr/local/bin/   # or anywhere on your PATH
 ```
